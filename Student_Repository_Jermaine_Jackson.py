@@ -33,7 +33,9 @@ class University:
         self.grades_data = self.grade_file_reader()
         self.majors_data = self.major_file_reader()
         self.students_data: Student = Student(directory,self.files_summary_grades,self.files_summary_majors)
-        #self.instructor_data: Instructor = Instructor(directory,self.files_summary_grades)
+        self.students_data.pretty_print()
+        self.instructor_data: Instructor = Instructor(directory,self.files_summary_grades)
+        self.instructor_data.pretty_print()
 
 
 
@@ -46,7 +48,7 @@ class University:
 
         sep = '|'
         fields = 4
-        header = False
+        header = True
 
         try:
             fp: IO = open(os.path.join(self.directory, self.grades_data_file), 'r', encoding='utf-8')
@@ -54,11 +56,14 @@ class University:
             return (f"Error can't open {os.path.join(self.directory, self.grades_data_file)}")
         else:
             with fp:
-                for number, line in enumerate(fp):
+                for number, line in enumerate(fp,1):
                     grades_fields = line.strip('\n').split(sep)
                     try:
                         if len(grades_fields) == fields:
-                            self.files_summary_grades.append(tuple(grades_fields))
+                            if number == 1 and header == True:
+                                pass
+                            else:
+                                self.files_summary_grades.append(tuple(grades_fields))
                         else:
                             print(
                                 f"Warning file has {len(grades_fields)} fields but expected {fields}")
@@ -133,6 +138,7 @@ class Student:
         self.directory: str = directory
         self.files_summary_student: Dict[str, Dict[str, int]] = dict()
         self.grades = grades
+        self.majors = majors
         self.sep = ';'
         self.fields = 3
         self.header = False
@@ -146,11 +152,11 @@ class Student:
         process student data
         '''
         student_id: Dict[str, str] = dict()
-        number: str = 1
         line: str
         v: str
         id: str
         grades: Dict[str, str] = {'A':4.0,'A-':3.75,'B+':3.25,'B':3.0,'B-':2.75,'C+':2.25,'C':2.0,'C-':0,'D+':0,'D':0,'D-':0,'F':0}
+        total_grades: Dict[str, str] = dict()
 
         try:
             fp:IO = open(os.path.join(self.directory,self.student_data_file), 'r', encoding='utf-8')
@@ -159,22 +165,25 @@ class Student:
             pass
         else:
             with fp:
-                    for number, line in enumerate (fp):
+                    for number, line in enumerate (fp,1):
                         student_fields: str = line.strip('\n').split(self.sep)
                         try:
                             if len(student_fields) == self.fields:
                                 if str(other).find(str(student_fields[0])) == -1:
-                                    print(f"Warning unknown student {student_fields[0]} in {os.path.join(self.directory, {os.path.join(self.directory,self.student_data_file)})} but not in grade file 'grades.txt'")
+                                    #print(f"Warning unknown student {student_fields[0]} in {os.path.join(self.directory, {os.path.join(self.directory,self.student_data_file)})} but not in grade file 'grades.txt'")
+                                    fix='yes'
                                 else:
                                     for id in other:
                                         if id[0] == student_fields[0]:
                                             if id[0] in student_id:
+                                                total_grades[id[0]] = total_grades[id[0]] + grades[id[2]]
                                                 student_id[student_fields[0]] =  student_id[student_fields[0]] + [id[1]]
                                             else:
+                                                total_grades[id[0]] = grades[id[2]]
                                                 student_id[student_fields[0]] = [id[1]]
                                         if student_fields[0] in student_id:
                                             self.files_summary_student[student_fields[0]] = {'Name': student_fields[1],'Major':student_fields[2],
-                                                                                              'Completed Courses': student_id[student_fields[0]]}
+                                                                                              'Completed Courses': student_id[student_fields[0]], 'GPA': total_grades}
                             else:
                                 line_number: int = number+1
                                 num_of_values: int = len(student_fields)
@@ -184,10 +193,19 @@ class Student:
                             return (
                                 f"Error {e} in {os.path.join(self.directory, self.student_data_file)} at line {line}")
 
-                    print (majors)
+                    #print (majors)
                     print (self.files_summary_student)
-                    for key, value in self.files_summary_student.items():
-                        print(list(set(majors[(value['Major']),'R']) - set(value['Completed Courses'])),list(set(majors[(value['Major']),'E']) - set(value['Completed Courses'])))
+                    #for key, value in self.files_summary_student.items():
+                        #print (len((list(set(majors[(value['Major']),'E'])))))
+                        #print (len((list(set(value['Completed Courses'])))))
+                        #print (majors[(value['Major']),'E'])
+                        #print (set(value['Completed Courses']) - set(majors[(value['Major']),'E']))
+
+                        #print(value['Major'],list(set(majors[(value['Major']),'R']) - set(value['Completed Courses'])),[ x for x in (list(set(majors[(value['Major']),'E']) - set(value['Completed Courses']))) if not set(majors[(value['Major']), 'E']).intersection(set(value['Completed Courses']))],round(value['GPA'][key]/len(value['Completed Courses']),2))
+
+                        #print (['' if set(majors[(value['Major']), 'E']).intersection(set(value['Completed Courses'])) else list(set(value['Completed Courses']) - set(majors[(value['Major']),'E']))])
+                        #print ([ x for x in (list(set(majors[(value['Major']),'E']) - set(value['Completed Courses']))) if not set(majors[(value['Major']), 'E']).intersection(set(value['Completed Courses']))])
+                        #print([ '' if x in majors[(value['Major']), 'E'] else x for x in value['Completed Courses']])
 
                     return self.files_summary_student
 
@@ -197,9 +215,9 @@ class Student:
         display the summary using pretty table format
         """
         res = PrettyTable()
-        res.field_names = ["CWID", "Name", "Completed Courses"]
+        res.field_names = ["CWID", "Name", "Major", "Completed Courses", "Remaining Required", "Remaining Electives","GPA"]
         for key, value in sorted(self.files_summary_student.items(), key = lambda x : (x[0][2])):
-                res.add_row([key, value['Name'], value['Completed Courses']])
+                res.add_row([key, value['Name'], value['Completed Courses'],value['Major'],list(set(self.majors[(value['Major']),'R']) - set(value['Completed Courses'])),[ x for x in (list(set(self.majors[(value['Major']),'E']) - set(value['Completed Courses']))) if not set(self.majors[(value['Major']), 'E']).intersection(set(value['Completed Courses']))],round(value['GPA'][key]/len(value['Completed Courses']),2)])
         print(f'Student summary')
         print(res)
 
