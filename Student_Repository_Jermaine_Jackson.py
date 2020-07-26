@@ -34,10 +34,7 @@ class University:
         self.majors_data = self.major_file_reader()
 
         self.students_data: Student = Student(directory,self.files_summary_grades,self.files_summary_majors)
-        self.students_data.pretty_print()
         self.instructor_data: Instructor = Instructor(directory,self.files_summary_grades)
-        self.instructor_data.pretty_print()
-
 
 
 
@@ -109,18 +106,19 @@ class University:
                     except IndexError as e:
                         return (f"Error {e} in {os.path.join(self.directory, self.majors_data_file)} at line {line}")
 
-
-
-            res = PrettyTable()
-            res.field_names = ["Major", "Required Courses", "Electives"]
-            res.add_row(('SFEN', self.files_summary_majors[('SFEN', 'R')], self.files_summary_majors[('SFEN', 'E')]))
-            res.add_row(('SYEN', sorted(self.files_summary_majors[('SYEN', 'R')]),
-                         sorted(self.files_summary_majors[('SYEN', 'E')])))
-            print(f'Majors summary')
-            print(res)
-
-
         return self.files_summary_majors
+
+    def pretty_print(self) -> None:
+        """
+            display the summary using pretty table format
+        """
+        res = PrettyTable()
+        res.field_names = ["Major", "Required Courses", "Electives"]
+        res.add_row(('SFEN', self.files_summary_majors[('SFEN', 'R')], self.files_summary_majors[('SFEN', 'E')]))
+        res.add_row(('SYEN', sorted(self.files_summary_majors[('SYEN', 'R')]),
+                     sorted(self.files_summary_majors[('SYEN', 'E')])))
+        print(f'Majors summary')
+        print(res)
 
 
 
@@ -204,7 +202,7 @@ class Student:
         res = PrettyTable()
         res.field_names = ["CWID", "Name", "Major", "Completed Courses", "Remaining Required", "Remaining Electives","GPA"]
         for key, value in sorted(self.files_summary_student.items(), key = lambda x : (x[0][2])):
-                res.add_row([key, value['Name'], value['Completed Courses'],value['Major'],list(set(self.majors[(value['Major']),'R']) - set(value['Completed Courses'])),[ x for x in (list(set(self.majors[(value['Major']),'E']) - set(value['Completed Courses']))) if not set(self.majors[(value['Major']), 'E']).intersection(set(value['Completed Courses']))],round(value['GPA'][key]/len(value['Completed Courses']),2)])
+                res.add_row([key, value['Name'],value['Major'],value['Completed Courses'],list(set(self.majors[(value['Major']),'R']) - set(value['Completed Courses'])),[ x for x in (list(set(self.majors[(value['Major']),'E']) - set(value['Completed Courses']))) if not set(self.majors[(value['Major']), 'E']).intersection(set(value['Completed Courses']))],round(value['GPA'][key]/len(value['Completed Courses']),2)])
         print(f'Student summary')
         print(res)
 
@@ -294,7 +292,3 @@ class Instructor:
                 res.add_row([key, k[0], k[1], k[2], k[3]])
         print(f'Instructor summary')
         print(res)
-
-
-
-university_data: University = University('/Users/jermainejackson/PycharmProjects/ssw810/University_Files')
