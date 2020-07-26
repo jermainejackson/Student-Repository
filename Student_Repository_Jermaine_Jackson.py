@@ -114,9 +114,8 @@ class University:
         """
         res = PrettyTable()
         res.field_names = ["Major", "Required Courses", "Electives"]
-        res.add_row(('SFEN', self.files_summary_majors[('SFEN', 'R')], self.files_summary_majors[('SFEN', 'E')]))
-        res.add_row(('SYEN', sorted(self.files_summary_majors[('SYEN', 'R')]),
-                     sorted(self.files_summary_majors[('SYEN', 'E')])))
+        res.add_row(('SFEN', sorted(self.files_summary_majors[('SFEN', 'R')]), sorted(self.files_summary_majors[('SFEN', 'E')])))
+        res.add_row(('SYEN', sorted(self.files_summary_majors[('SYEN', 'R')]),sorted(self.files_summary_majors[('SYEN', 'E')])))
         print(f'Majors summary')
         print(res)
 
@@ -199,10 +198,14 @@ class Student:
         """
         display the summary using pretty table format
         """
+        print (self.files_summary_student.items())
         res = PrettyTable()
         res.field_names = ["CWID", "Name", "Major", "Completed Courses", "Remaining Required", "Remaining Electives","GPA"]
-        for key, value in sorted(self.files_summary_student.items(), key = lambda x : (x[0][2])):
-                res.add_row([key, value['Name'],value['Major'],value['Completed Courses'],list(set(self.majors[(value['Major']),'R']) - set(value['Completed Courses'])),[ x for x in (list(set(self.majors[(value['Major']),'E']) - set(value['Completed Courses']))) if not set(self.majors[(value['Major']), 'E']).intersection(set(value['Completed Courses']))],round(value['GPA'][key]/len(value['Completed Courses']),2)])
+        for key, value in sorted(self.files_summary_student.items()):
+                res.add_row([key, value['Name'],value['Major'],sorted(value['Completed Courses']),sorted(list(set(self.majors[(value['Major']),'R'])
+                - set(value['Completed Courses']))),sorted([ x for x in (list(set(self.majors[(value['Major']),'E']) - set(value['Completed Courses'])))
+                if not set(self.majors[(value['Major']), 'E']).intersection(set(value['Completed Courses']))]),
+                                    round(value['GPA'][key]/len(value['Completed Courses']),2)])
         print(f'Student summary')
         print(res)
 
