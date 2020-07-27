@@ -1,6 +1,6 @@
 #!/bin/python
 '''
-Created on July 18 2020
+Created on July 24 2020
 @author: Jermaine Jackson
 This is a data repository of courses, students and instructors to helps University
 faculty and students to create study plans
@@ -20,7 +20,7 @@ class University:
     Stores students, instructor and grades
     '''
 
-    def __init__(self, directory: str) -> None:
+    def __init__(self, directory: str) -> "None":
         """
         initialize directory and files_summary
         """
@@ -37,15 +37,14 @@ class University:
         self.instructor_data: Instructor = Instructor(directory,self.files_summary_grades)
 
 
-
-    def file_reader(data_file: str, directory: str):
+    def file_reader(self,data_file, directory):
 
         data: str
 
         try:
             with open(os.path.join(directory, data_file), 'r', encoding='utf-8') as fp:IO
         except FileNotFoundError:
-            return (f"Can't open {os.path.join(directory, data_file)}")
+            raise  FileNotFoundError (f"Can't open {os.path.join(directory, data_file)}")
         else:
             with open(os.path.join(directory, data_file), 'r') as fp:
                 data = fp.readlines()
@@ -64,7 +63,7 @@ class University:
         fields = 4
         header = True
 
-        fp: str = University.file_reader(self.grades_data_file,self.directory)
+        fp: str = University.file_reader(self,self.grades_data_file,self.directory)
         for number, line in enumerate(fp,1):
             grades_fields = line.strip('\n').split(sep)
             try:
@@ -92,7 +91,7 @@ class University:
         fields = 3
         header = True
 
-        fp: str = University.file_reader(self.majors_data_file, self.directory)
+        fp: str = University.file_reader(self,self.majors_data_file, self.directory)
         for number, line in enumerate(fp, 1):
             majors_fields: str = line.strip('\n').split(sep)
             try:
@@ -158,7 +157,7 @@ class Student:
         total_grades: Dict[str, str] = dict()
         header: bool = True
 
-        fp: str = University.file_reader(self.student_data_file, self.directory)
+        fp: str = University.file_reader(self,self.student_data_file, self.directory)
 
         for number, line in enumerate (fp,1):
             student_fields: str = line.strip('\n').split(self.sep)
@@ -253,7 +252,7 @@ class Instructor:
                 instruct_feq[grade] = 1
 
 
-        fp: str = University.file_reader(self.instructor_data_file, self.directory)
+        fp: str = University.file_reader(self,self.instructor_data_file, self.directory)
 
         for number, line in enumerate(fp,1):
             instructor_fields: str = line.strip('\n').split(self.sep)
@@ -287,7 +286,7 @@ class Instructor:
         """
         res = PrettyTable()
         res.field_names = ["CWID", "Name", "Dept", "Course", "Students"]
-        for key, value in sorted(self.files_summary_instructor.items(), key = lambda x : (x[0][2])):
+        for key, value in sorted(self.files_summary_instructor.items(), key = lambda x : (x[0][1])):
             for k in value:
                 res.add_row([key, k[0], k[1], k[2], k[3]])
         print(f'Instructor summary')

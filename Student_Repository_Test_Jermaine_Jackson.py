@@ -1,6 +1,6 @@
 #!/bin/python
 '''
-Created on July 18 2020
+Created on July 24 2020
 @author: Jermaine Jackson
 This is a data repository of courses, students and instructors to helps University
 faculty and students to create study plans
@@ -74,14 +74,6 @@ class RepositoryUnitTest(unittest.TestCase):
         self.university_data.pretty_print()
         self.university_data.students_data.pretty_print()
         self.university_data.instructor_data.pretty_print()
-
-
-
-
-
-
-
-
 
 
 
