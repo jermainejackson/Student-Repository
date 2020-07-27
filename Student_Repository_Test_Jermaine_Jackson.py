@@ -67,6 +67,32 @@ class RepositoryUnitTest(unittest.TestCase):
                          ['SSW 810', 'SSW 565', 'SSW 540'])
 
 
+
+    def test_grades_repository(self) -> None:
+        """ testing grades repository and display data """
+        self.assertEqual(self.university_data.files_summary_grades[0],('10103', 'SSW 567', 'A', '98765'))
+        self.assertEqual(self.university_data.files_summary_grades[1], ('10103', 'SSW 564', 'A-', '98764'))
+        self.assertEqual(self.university_data.files_summary_grades[2], ('10103', 'SSW 687', 'B', '98764'))
+        self.assertEqual(self.university_data.files_summary_grades[3], ('10103', 'CS 501', 'B', '98764'))
+        self.assertEqual(self.university_data.files_summary_grades[4], ('10115', 'SSW 567', 'A', '98765'))
+        self.assertEqual(self.university_data.files_summary_grades[5], ('10115', 'SSW 564', 'B+', '98764'))
+        self.assertEqual(self.university_data.files_summary_grades[6], ('10115', 'SSW 687', 'A', '98764'))
+        self.assertEqual(self.university_data.files_summary_grades[7], ('10115', 'CS 545', 'A', '98764'))
+        self.assertEqual(self.university_data.files_summary_grades[8], ('10172', 'SSW 555', 'A', '98763'))
+        self.assertEqual(self.university_data.files_summary_grades[9], ('10172', 'SSW 567', 'A-', '98765'))
+        self.assertEqual(self.university_data.files_summary_grades[10], ('10175', 'SSW 567', 'A', '98765'))
+        self.assertEqual(self.university_data.files_summary_grades[11], ('10175', 'SSW 564', 'A', '98764'))
+        self.assertEqual(self.university_data.files_summary_grades[12], ('10175', 'SSW 687', 'B-', '98764'))
+        self.assertEqual(self.university_data.files_summary_grades[13], ('10183', 'SSW 689', 'A', '98763'))
+        self.assertEqual(self.university_data.files_summary_grades[14], ('11399', 'SSW 540', 'B', '98765'))
+        self.assertEqual(self.university_data.files_summary_grades[15], ('11461', 'SYS 800', 'A', '98760'))
+        self.assertEqual(self.university_data.files_summary_grades[16], ('11461', 'SYS 750', 'A-', '98760'))
+        self.assertEqual(self.university_data.files_summary_grades[17], ('11461', 'SYS 611', 'A', '98760'))
+        self.assertEqual(self.university_data.files_summary_grades[18], ('11658', 'SSW 540', 'F', '98765'))
+        self.assertEqual(self.university_data.files_summary_grades[19], ('11714', 'SYS 611', 'A', '98760'))
+        self.assertEqual(self.university_data.files_summary_grades[20], ('11714', 'SYS 645', 'C', '98760'))
+        self.assertEqual(self.university_data.files_summary_grades[21], ('11788', 'SSW 540', 'A', '98765'))
+
     def test_display_results(self) -> None:
         """
         print the results for majors, students and professors
