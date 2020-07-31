@@ -12,6 +12,7 @@ from typing import Any, List, Optional, Sequence, Iterator, DefaultDict, Tuple, 
 from datetime import date, datetime, timedelta
 from typing.io import IO
 from prettytable import PrettyTable
+import sqlite3
 
 
 
@@ -27,14 +28,19 @@ class University:
         self.directory: str = directory
         self.files_summary_grades: List[str] = list()
         self.files_summary_majors: DefaultDict[str,str] = defaultdict()
+        self.student_grades: List[str] = list()
         self.grades_data_file = 'grades.txt'
         self.majors_data_file = 'majors.txt'
 
         self.grades_data = self.process_grades()
+        print (self.grades_data)
         self.majors_data = self.process_majors()
+        print (self.majors_data)
 
         self.students_data: Student = Student(directory,self.files_summary_grades,self.files_summary_majors)
+        self.students_data.pretty_print()
         self.instructor_data: Instructor = Instructor(directory,self.files_summary_grades)
+        self.instructor_data.pretty_print()
 
 
     def file_reader(self,data_file, directory):
@@ -59,7 +65,7 @@ class University:
          process student data
          '''
 
-        sep = '|'
+        sep = '\t'
         fields = 4
         header = True
 
@@ -114,16 +120,47 @@ class University:
         return self.files_summary_majors
 
 
-    def pretty_print(self) -> None:
+    def pretty_print_majors(self) -> None:
         """
             display the summary using pretty table format
         """
         res = PrettyTable()
         res.field_names = ["Major", "Required Courses", "Electives"]
         res.add_row(('SFEN', sorted(self.files_summary_majors[('SFEN', 'R')]), sorted(self.files_summary_majors[('SFEN', 'E')])))
-        res.add_row(('SYEN', sorted(self.files_summary_majors[('SYEN', 'R')]),sorted(self.files_summary_majors[('SYEN', 'E')])))
+        res.add_row(('CS', sorted(self.files_summary_majors[('CS', 'R')]),sorted(self.files_summary_majors[('CS', 'E')])))
         print(f'Majors summary')
         print(res)
+
+
+
+
+
+    def student_grades_table_db(self,db_path):
+        '''
+        connect to db and display data
+        '''
+        db_file: str = db_path
+        res = PrettyTable()
+        db: sqlite3.Connection = sqlite3.connect(db_file)
+        for row in db.execute("select o.Name,o.CWID,i.Course, i.Grade, s.Name from students o join grades i on o.CWID == i.StudentCWID "
+                              "join instructors s on s.CWID = i.InstructorCWID order by o.Name"):
+            self.student_grades.append(row)
+
+
+
+    def pretty_print_student_grades_table_db(self) -> None:
+        """
+            display the summary using pretty table format
+        """
+        res = PrettyTable()
+        res.field_names = ["Name", "CWID", "Course","Grade", "Instructor"]
+        for row in self.student_grades:
+            res.add_row([row[0],row[1],row[2],row[3],row[4]])
+        print(f'Student Grade Summary')
+        print(res)
+
+
+
 
 
 class Student:
@@ -138,7 +175,7 @@ class Student:
         self.files_summary_student: Dict[str, Dict[str, int]] = dict()
         self.grades = grades
         self.majors = majors
-        self.sep = ';'
+        self.sep = '\t'
         self.fields = 3
         self.student_data_file = 'students.txt'
 
@@ -175,11 +212,12 @@ class Student:
                                         total_grades[id[0]] = total_grades[id[0]] + grades[id[2]]
                                         if id[2] == 'F':
                                             student_id[student_fields[0]] = student_id[student_fields[0]] + []
-                                        student_id[student_fields[0]] =  student_id[student_fields[0]] + [id[1]]
+                                        else:
+                                            student_id[student_fields[0]] =  student_id[student_fields[0]] + [id[1]]
                                     else:
                                         total_grades[id[0]] = grades[id[2]]
                                         if id[2] == 'F':
-                                            student_id[student_fields[0]] = ['']
+                                            student_id[student_fields[0]] = []
                                         else:
                                             student_id[student_fields[0]] = [id[1]]
                                 if student_fields[0] in student_id:
@@ -228,7 +266,7 @@ class Instructor:
         self.files_summary_instructor: DefaultDict[str] = defaultdict(set)
         self.files_counts_classes: List[str] = list()
         self.grades = grades
-        self.sep = '|'
+        self.sep = '\t'
         self.fields = 3
         self.header = False
         self.instructor_data_file = 'instructors.txt'
@@ -297,3 +335,8 @@ class Instructor:
         print(f'Instructor summary')
         print(res)
 
+
+university_data: University = University('/Users/jermainejackson/PycharmProjects/ssw810/University_Files')
+university_data.pretty_print_majors()
+university_data.student_grades_table_db("/Users/jermainejackson/binaries/hw11.sqlite")
+university_data.pretty_print_student_grades_table_db()
