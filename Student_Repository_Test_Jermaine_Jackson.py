@@ -1,6 +1,6 @@
 #!/bin/python
 '''
-Created on July 24 2020
+Created on July 26 2020
 @author: Jermaine Jackson
 This is a data repository of courses, students and instructors to helps University
 faculty and students to create study plans

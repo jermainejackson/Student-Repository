@@ -1,6 +1,6 @@
 #!/bin/python
 '''
-Created on July 24 2020
+Created on July 26 2020
 @author: Jermaine Jackson
 This is a data repository of courses, students and instructors to helps University
 faculty and students to create study plans
@@ -26,7 +26,7 @@ class University:
         """
         self.directory: str = directory
         self.files_summary_grades: List[str] = list()
-        self.files_summary_majors: DefaultDict[str] = defaultdict()
+        self.files_summary_majors: DefaultDict[str,str] = defaultdict()
         self.grades_data_file = 'grades.txt'
         self.majors_data_file = 'majors.txt'
 
@@ -130,7 +130,7 @@ class Student:
     """
     initialize directory and files_summary
     """
-    def __init__(self, directory: str, grades: str, majors: str) -> None:
+    def __init__(self, directory: str, grades: List[tuple], majors: List[tuple]) -> None:
         """
         initialize directory and files_summary
         """
@@ -173,10 +173,15 @@ class Student:
                                 if id[0] == student_fields[0]:
                                     if id[0] in student_id:
                                         total_grades[id[0]] = total_grades[id[0]] + grades[id[2]]
+                                        if id[2] == 'F':
+                                            student_id[student_fields[0]] = student_id[student_fields[0]] + []
                                         student_id[student_fields[0]] =  student_id[student_fields[0]] + [id[1]]
                                     else:
                                         total_grades[id[0]] = grades[id[2]]
-                                        student_id[student_fields[0]] = [id[1]]
+                                        if id[2] == 'F':
+                                            student_id[student_fields[0]] = ['']
+                                        else:
+                                            student_id[student_fields[0]] = [id[1]]
                                 if student_fields[0] in student_id:
                                     self.files_summary_student[student_fields[0]] = {'Name': student_fields[1],'Major':student_fields[2],
                                                                                       'Completed Courses': student_id[student_fields[0]], 'GPA': total_grades}
@@ -215,7 +220,7 @@ class Instructor:
     """
     initialize directory and files_summary
     """
-    def __init__(self, directory: str, grades: str) -> None:
+    def __init__(self, directory: List[tuple], grades: List[tuple]) -> None:
         """
         initialize directory and files_summary
         """
@@ -232,7 +237,7 @@ class Instructor:
         self.instructor_file_reader(grades)
 
 
-    def instructor_file_reader(self, other: "Instructor") -> None:
+    def instructor_file_reader(self, other: "Instructor") -> "Instructor":
         '''
         process instructor data and return results
         '''
