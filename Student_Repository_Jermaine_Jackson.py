@@ -254,14 +254,15 @@ class University:
 
 class Student:
     """
-    initialize Student attributes
+    Student class
     """
     def __init__(self, files_summary_student:Dict[str, str], files_summary_majors: Dict[str, str]) -> None:
         """
-        process student data
+        initialize student attributes
         """
         self.files_summary_student = files_summary_student
         self.files_summary_majors = files_summary_majors
+
 
     def student_pretty_print(self) -> None:
         """
@@ -282,7 +283,7 @@ class Student:
 
 class Instructor:
     """
-    initialize directory and files_summary
+    Instructor class
     """
     def __init__(self, files_summary_instructor: Dict[str, str], files_summary_majors: Dict[str, str]) -> None:
         """
