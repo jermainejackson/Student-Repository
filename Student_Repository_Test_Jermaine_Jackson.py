@@ -17,102 +17,104 @@ from Student_Repository_Jermaine_Jackson import University, Student, Instructor
 class RepositoryUnitTest(unittest.TestCase):
 
     university_data: University = University('/Users/jermainejackson/PycharmProjects/ssw810/University_Files')
+    student_data: Student = Student(university_data.files_summary_student, university_data.files_summary_majors)
+    instructor_data: Instructor = Instructor(university_data.files_summary_instructor,university_data.files_summary_majors)
 
     def test_student_repository(self) -> None:
         """ testing students repository and display data """
-        self.assertEqual(self.university_data.students_data.files_summary_student['10103']['Name'],'Jobs, S')
-        self.assertEqual(self.university_data.students_data.files_summary_student['10115']['Name'], 'Bezos, J')
-        self.assertEqual(self.university_data.students_data.files_summary_student['10183']['Name'], 'Musk, E')
-        self.assertEqual(self.university_data.students_data.files_summary_student['11714']['Name'], 'Gates, B')
+        self.assertEqual(self.university_data.files_summary_student['10103']['Name'],'Jobs, S')
+        self.assertEqual(self.university_data.files_summary_student['10115']['Name'], 'Bezos, J')
+        self.assertEqual(self.university_data.files_summary_student['10183']['Name'], 'Musk, E')
+        self.assertEqual(self.university_data.files_summary_student['11714']['Name'], 'Gates, B')
 
 
-        self.assertEqual(self.university_data.students_data.files_summary_student['10103']['Major'],
+        self.assertEqual(self.university_data.files_summary_student['10103']['Major'],
                          'SFEN')
 
-        self.assertEqual(self.university_data.students_data.files_summary_student['10115']['Major'],
+        self.assertEqual(self.university_data.files_summary_student['10115']['Major'],
                          'SFEN')
 
-        self.assertEqual(self.university_data.students_data.files_summary_student['10183']['Major'],
+        self.assertEqual(self.university_data.files_summary_student['10183']['Major'],
                          'SFEN')
 
-        self.assertEqual(self.university_data.students_data.files_summary_student['11714']['Major'],
+        self.assertEqual(self.university_data.files_summary_student['11714']['Major'],
                          'CS')
 
-        self.assertEqual(sorted(self.university_data.students_data.files_summary_student['10103']['Completed Courses']),
+        self.assertEqual(sorted(self.university_data.files_summary_student['10103']['Completed Courses']),
                          ['CS 501', 'SSW 810'])
 
-        self.assertEqual(sorted(self.university_data.students_data.files_summary_student['10115']['Completed Courses']),
+        self.assertEqual(sorted(self.university_data.files_summary_student['10115']['Completed Courses']),
                          ['SSW 810'])
 
-        self.assertEqual(sorted(self.university_data.students_data.files_summary_student['10183']['Completed Courses']),
+        self.assertEqual(sorted(self.university_data.files_summary_student['10183']['Completed Courses']),
                          ['SSW 555', 'SSW 810'])
 
-        self.assertEqual(sorted(self.university_data.students_data.files_summary_student['11714']['Completed Courses']),
+        self.assertEqual(sorted(self.university_data.files_summary_student['11714']['Completed Courses']),
                          ['CS 546', 'CS 570', 'SSW 810'])
 
-        self.assertEqual(sorted(list((set(self.university_data.majors_data[('SFEN', 'R')])
-                    - set(self.university_data.students_data.files_summary_student['10103']['Completed Courses'])))), ['SSW 540', 'SSW 555'])
+        self.assertEqual(sorted(list((set(self.university_data.files_summary_majors[('SFEN', 'R')])
+                    - set(self.university_data.files_summary_student['10103']['Completed Courses'])))), ['SSW 540', 'SSW 555'])
 
-        self.assertEqual(sorted(list((set(self.university_data.majors_data[('SFEN', 'R')])
-                    - set(self.university_data.students_data.files_summary_student['10115']['Completed Courses'])))), ['SSW 540', 'SSW 555'])
+        self.assertEqual(sorted(list((set(self.university_data.files_summary_majors[('SFEN', 'R')])
+                    - set(self.university_data.files_summary_student['10115']['Completed Courses'])))), ['SSW 540', 'SSW 555'])
 
-        self.assertEqual(sorted(list((set(self.university_data.majors_data[('SFEN', 'R')])
-                    - set(self.university_data.students_data.files_summary_student['10183']['Completed Courses'])))), ['SSW 540'])
+        self.assertEqual(sorted(list((set(self.university_data.files_summary_majors[('SFEN', 'R')])
+                    - set(self.university_data.files_summary_student['10183']['Completed Courses'])))), ['SSW 540'])
 
-        self.assertEqual(sorted(list((set(self.university_data.majors_data[('CS', 'R')])
-                    - set(self.university_data.students_data.files_summary_student['11714']['Completed Courses'])))), [])
+        self.assertEqual(sorted(list((set(self.university_data.files_summary_majors[('CS', 'R')])
+                    - set(self.university_data.files_summary_student['11714']['Completed Courses'])))), [])
 
-        self.assertEqual(sorted([x for x in (list(set(self.university_data.process_majors()[('SFEN', 'E')])
-                                           - set(self.university_data.students_data.files_summary_student['10103']['Completed Courses'])))
-                          if not set(self.university_data.process_majors()[('SFEN', 'E')]).intersection(
-                set(self.university_data.students_data.files_summary_student['10103']['Completed Courses']))
+        self.assertEqual(sorted([x for x in (list(set(self.university_data.process_majors(self.university_data.majors_data_file, True, 3)[('SFEN', 'E')])
+                                           - set(self.university_data.files_summary_student['10103']['Completed Courses'])))
+                          if not set(self.university_data.process_majors(self.university_data.majors_data_file, True, 3)[('SFEN', 'E')]).intersection(
+                set(self.university_data.files_summary_student['10103']['Completed Courses']))
                           ]), [])
 
-        self.assertEqual(sorted([x for x in (list(set(self.university_data.process_majors()[('SFEN', 'E')])
-                                           - set(self.university_data.students_data.files_summary_student['10115']['Completed Courses'])))
-                          if not set(self.university_data.process_majors()[('SFEN', 'E')]).intersection(
-                set(self.university_data.students_data.files_summary_student['10115']['Completed Courses']))
+        self.assertEqual(sorted([x for x in (list(set(self.university_data.process_majors(self.university_data.majors_data_file, True, 3)[('SFEN', 'E')])
+                                           - set(self.university_data.files_summary_student['10115']['Completed Courses'])))
+                          if not set(self.university_data.process_majors(self.university_data.majors_data_file, True, 3)[('SFEN', 'E')]).intersection(
+                set(self.university_data.files_summary_student['10115']['Completed Courses']))
                           ]), ['CS 501', 'CS 546'])
 
 
-        self.assertEqual(sorted([x for x in (list(set(self.university_data.process_majors()[('SFEN', 'E')])
-                                           - set(self.university_data.students_data.files_summary_student['10183']['Completed Courses'])))
-                          if not set(self.university_data.process_majors()[('SFEN', 'E')]).intersection(
-                set(self.university_data.students_data.files_summary_student['10183']['Completed Courses']))
+        self.assertEqual(sorted([x for x in (list(set(self.university_data.process_majors(self.university_data.majors_data_file, True, 3)[('SFEN', 'E')])
+                                           - set(self.university_data.files_summary_student['10183']['Completed Courses'])))
+                          if not set(self.university_data.process_majors(self.university_data.majors_data_file, True, 3)[('SFEN', 'E')]).intersection(
+                set(self.university_data.files_summary_student['10183']['Completed Courses']))
                           ]), ['CS 501', 'CS 546'])
 
 
-        self.assertEqual(sorted([x for x in (list(set(self.university_data.process_majors()[('SFEN', 'E')])
-                                           - set(self.university_data.students_data.files_summary_student['11714']['Completed Courses'])))
-                          if not set(self.university_data.process_majors()[('SFEN', 'E')]).intersection(
-                set(self.university_data.students_data.files_summary_student['11714']['Completed Courses']))
+        self.assertEqual(sorted([x for x in (list(set(self.university_data.process_majors(self.university_data.majors_data_file, True, 3)[('SFEN', 'E')])
+                                           - set(self.university_data.files_summary_student['11714']['Completed Courses'])))
+                          if not set(self.university_data.process_majors(self.university_data.majors_data_file, True, 3)[('SFEN', 'E')]).intersection(
+                set(self.university_data.files_summary_student['11714']['Completed Courses']))
                           ]), [])
 
 
-        self.assertEqual(round((self.university_data.students_data.files_summary_student['10103']['GPA']['10103']
-               /len(self.university_data.students_data.files_summary_student['10103']['Completed Courses'])),2),3.38)
+        self.assertEqual(round((self.university_data.files_summary_student['10103']['GPA']['10103']
+               /len(self.university_data.files_summary_student['10103']['Completed Courses'])),2),3.38)
 
 
-        self.assertEqual(round((self.university_data.students_data.files_summary_student['10115']['GPA']['10115']
-               /len(self.university_data.students_data.files_summary_student['10115']['Completed Courses'])),2),4.0)
+        self.assertEqual(round((self.university_data.files_summary_student['10115']['GPA']['10115']
+               /len(self.university_data.files_summary_student['10115']['Completed Courses'])),2),4.0)
 
-        self.assertEqual(round((self.university_data.students_data.files_summary_student['10183']['GPA']['10183']
-               /len(self.university_data.students_data.files_summary_student['10183']['Completed Courses'])),2),4.0)
+        self.assertEqual(round((self.university_data.files_summary_student['10183']['GPA']['10183']
+               /len(self.university_data.files_summary_student['10183']['Completed Courses'])),2),4.0)
 
-        self.assertEqual(round((self.university_data.students_data.files_summary_student['11714']['GPA']['11714']
-               /len(self.university_data.students_data.files_summary_student['11714']['Completed Courses'])),2),3.5)
+        self.assertEqual(round((self.university_data.files_summary_student['11714']['GPA']['11714']
+               /len(self.university_data.files_summary_student['11714']['Completed Courses'])),2),3.5)
 
 
 
     def test_instructor_repository(self) -> None:
         """ testing instructor repository and display data """
-        self.assertEqual(self.university_data.instructor_data.files_summary_instructor['98764'],
+        self.assertEqual(self.university_data.files_summary_instructor['98764'],
                          {('Cohen, R', 'SFEN', 'CS 546', 1)})
 
-        self.assertEqual(self.university_data.instructor_data.files_summary_instructor['98763'],
+        self.assertEqual(self.university_data.files_summary_instructor['98763'],
                          {('Rowland, J', 'SFEN', 'SSW 810', 4), ('Rowland, J', 'SFEN', 'SSW 555', 1)})
 
-        self.assertEqual(self.university_data.instructor_data.files_summary_instructor['98762'],
+        self.assertEqual(self.university_data.files_summary_instructor['98762'],
                          {('Hawking, S', 'CS', 'CS 501', 1),
                           ('Hawking, S', 'CS', 'CS 546', 1),
                           ('Hawking, S', 'CS', 'CS 570', 1)})
@@ -170,8 +172,9 @@ class RepositoryUnitTest(unittest.TestCase):
         print the results for majors, students and professors
         """
         self.university_data.pretty_print_majors()
-        self.university_data.students_data.pretty_print()
-        self.university_data.instructor_data.pretty_print()
+        self.student_data.student_pretty_print()
+        self.instructor_data.instructor_pretty_print()
+        self.university_data.student_grades_table_db('/Users/jermainejackson/PycharmProjects/ssw810/hw11.sqlite.db')
         self.university_data.pretty_print_student_grades_table_db()
 
 

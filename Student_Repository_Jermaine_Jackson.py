@@ -28,19 +28,28 @@ class University:
         self.directory: str = directory
         self.files_summary_grades: List[str] = list()
         self.files_summary_majors: DefaultDict[str,str] = defaultdict()
+        self.files_summary_student: Dict[str, Dict[str, int]] = dict()
         self.student_grades_db: List[str] = list()
-        self.grades_data_file = 'grades.txt'
-        self.majors_data_file = 'majors.txt'
+        self.files_summary_instructor: DefaultDict[str] = defaultdict(set)
+        self.files_counts_classes: List[str] = list()
 
-        self.grades_data = self.process_grades()
-        self.majors_data = self.process_majors()
 
-        self.students_data: Student = Student(directory,self.files_summary_grades,self.files_summary_majors)
-        self.instructor_data: Instructor = Instructor(directory,self.files_summary_grades)
+        self.grades_data_file: str = self.file_reader('grades.txt', directory,'\t')
+        self.majors_data_file: str = self.file_reader('majors.txt', directory,'\t')
+        self.students_data_file: str = self.file_reader('students.txt', directory,'\t')
+        self.instructors_data_file: str = self.file_reader('instructors.txt', directory,'\t')
 
-    def file_reader(self,data_file, directory):
 
-        data: str
+        self.process_grades(self.grades_data_file,True,4)
+        self.process_majors(self.majors_data_file, True, 3)
+        self.student(self.grades_data_file,self.majors_data_file, self.students_data_file,True,3)
+        self.instructor(self.grades_data_file, self.majors_data_file, self.instructors_data_file, True, 3)
+
+
+
+    def file_reader(self,data_file: str, directory: str,sep: int):
+
+        data: List[str] = list()
 
         try:
             with open(os.path.join(directory, data_file), 'r', encoding='utf-8') as fp:IO
@@ -48,34 +57,29 @@ class University:
             raise  FileNotFoundError (f"Can't open {os.path.join(directory, data_file)}")
         else:
             with open(os.path.join(directory, data_file), 'r') as fp:
-                data = fp.readlines()
+                for line in fp:
+                    data.append(line.strip('\n').split(sep))
 
         return data
 
 
 
 
-    def process_grades(self) -> 'process_grades':
+    def process_grades(self,grades_data_file: List[str],header: bool,fields: int) -> 'process_grades':
         '''
          process student data
          '''
 
-        sep = '\t'
-        fields = 4
-        header = True
-
-        fp: str = University.file_reader(self,self.grades_data_file,self.directory)
-        for number, line in enumerate(fp,1):
-            grades_fields = line.strip('\n').split(sep)
+        for number, line in enumerate(grades_data_file,1):
             try:
-                if len(grades_fields) == fields:
+                if len(line) == fields:
                     if number == 1 and header == True:
                         pass
                     else:
-                        self.files_summary_grades.append(tuple(grades_fields))
+                        self.files_summary_grades.append(tuple(line))
                 else:
                     print(
-                        f"Warning grades  {self.grades_data_file} file has {len(grades_fields)} fields but expected {fields} at line {number}")
+                        f"Warning grades  {self.grades_data_file} file has {len(line)} fields but expected {fields} at line {number}")
             except IndexError as e:
                 return (f"Error {e} in {os.path.join(self.directory, self.grades_data_file)} at line {number}")
 
@@ -83,32 +87,26 @@ class University:
 
 
 
-    def process_majors(self) -> 'process_majors':
+    def process_majors(self,majors_data_file: List[str],header: bool,fields: int) -> 'process_majors':
         '''
          process majors data
          '''
 
-        sep = '\t'
-        fields = 3
-        header = True
-
-        fp: str = University.file_reader(self,self.majors_data_file, self.directory)
-        for number, line in enumerate(fp, 1):
-            majors_fields: str = line.strip('\n').split(sep)
+        for number, line in enumerate(majors_data_file, 1):
             try:
-                if len(majors_fields) == fields:
+                if len(line) == fields:
                     if number == 1 and header == True:
                         pass
                     else:
-                        if (majors_fields[0],majors_fields[1]) in self.files_summary_majors:
-                            self.files_summary_majors[majors_fields[0],majors_fields[1]].append(majors_fields[2])
+                        if (line[0],line[1]) in self.files_summary_majors:
+                            self.files_summary_majors[line[0],line[1]].append(line[2])
                         else:
-                            self.files_summary_majors[majors_fields[0],majors_fields[1]]=[
-                                majors_fields[2]]
+                            self.files_summary_majors[line[0],line[1]]=[
+                                line[2]]
 
                 else:
                     print(
-                        f"Warning file has {len(majors_fields)} fields but expected {fields}")
+                        f"Warning file has {len(line)} fields but expected {fields}")
             except IndexError as e:
                 return (f"Error {e} in {os.path.join(self.directory, self.majors_data_file)} at line {line}")
 
@@ -128,9 +126,7 @@ class University:
 
 
 
-
-
-    def student_grades_table_db(self,db_path):
+    def student_grades_table_db(self,db_path: str):
         '''
         connect to db and display data
         '''
@@ -159,28 +155,7 @@ class University:
 
 
 
-
-
-class Student:
-    """
-    initialize directory and files_summary
-    """
-    def __init__(self, directory: str, grades: List[tuple], majors: List[tuple]) -> None:
-        """
-        initialize directory and files_summary
-        """
-        self.directory: str = directory
-        self.files_summary_student: Dict[str, Dict[str, int]] = dict()
-        self.grades = grades
-        self.majors = majors
-        self.sep = '\t'
-        self.fields = 3
-        self.student_data_file = 'students.txt'
-
-        self.student_file_reader(grades,majors)
-
-
-    def student_file_reader(self, other: "Student", majors: "Student") -> "Student":
+    def student(self, gd_list: List[str] , majors: List[str],student_data_file: List[str],header: bool,fields: int) -> "Student":
         '''
         process student data
         '''
@@ -190,90 +165,47 @@ class Student:
         id: str
         grades: Dict[str, str] = {'A':4.0,'A-':3.75,'B+':3.25,'B':3.0,'B-':2.75,'C+':2.25,'C':2.0,'C-':0,'D+':0,'D':0,'D-':0,'F':0}
         total_grades: Dict[str, str] = dict()
-        header: bool = True
 
-        fp: str = University.file_reader(self,self.student_data_file, self.directory)
-
-        for number, line in enumerate (fp,1):
-            student_fields: str = line.strip('\n').split(self.sep)
+        for number, line in enumerate (student_data_file,1):
             try:
-                if len(student_fields) == self.fields:
+                if len(line) == fields:
                     if number == 1 and header == True:
                         pass
                     else:
-                        if str(other).find(str(student_fields[0])) == -1:
-                            print(f"Warning unknown student {student_fields[0]} in {os.path.join(self.directory, {os.path.join(self.directory,self.student_data_file)})} but not in grade file 'grades.txt'")
+                        if str(gd_list).find(str(line[0])) == -1:
+                            print(f"Warning unknown student {line[0]} in {os.path.join(self.directory, {os.path.join(self.directory,self.student_data_file)})} but not in grade file 'grades.txt'")
                         else:
-                            for id in other:
-                                if id[0] == student_fields[0]:
+                            for id in gd_list:
+                                if id[0] == line[0]:
                                     if id[0] in student_id:
                                         total_grades[id[0]] = total_grades[id[0]] + grades[id[2]]
                                         if id[2] == 'F':
-                                            student_id[student_fields[0]] = student_id[student_fields[0]] + []
+                                            student_id[line[0]] = student_id[line[0]] + []
                                         else:
-                                            student_id[student_fields[0]] =  student_id[student_fields[0]] + [id[1]]
+                                            student_id[line[0]] =  student_id[line[0]] + [id[1]]
                                     else:
                                         total_grades[id[0]] = grades[id[2]]
                                         if id[2] == 'F':
-                                            student_id[student_fields[0]] = []
+                                            student_id[line[0]] = []
                                         else:
-                                            student_id[student_fields[0]] = [id[1]]
-                                if student_fields[0] in student_id:
-                                    self.files_summary_student[student_fields[0]] = {'Name': student_fields[1],'Major':student_fields[2],
-                                                                                      'Completed Courses': student_id[student_fields[0]], 'GPA': total_grades}
+                                            student_id[line[0]] = [id[1]]
+                                if line[0] in student_id:
+                                    self.files_summary_student[line[0]] = {'Name': line[1],'Major':line[2],
+                                                                                      'Completed Courses': student_id[line[0]], 'GPA': total_grades}
                 else:
-                    num_of_values: int = len(student_fields)
-                    print (f"Warning : {os.path.join(self.directory,self.student_data_file)} has {num_of_values} fields on line {number} but expected {self.fields}")
+                    num_of_values: int = len(line)
+                    print (f"Warning : {os.path.join(self.directory,self.student_data_file)} has {num_of_values} fields on line {number} but expected {fields}")
 
             except IndexError as e:
                 return (
                     f"Error {e} in {os.path.join(self.directory, self.student_data_file)} at line {number}")
 
-
         return self.files_summary_student
 
 
-    def pretty_print(self) -> None:
-        """
-        display the summary using pretty table format
-        """
-        res = PrettyTable()
-        res.field_names = ["CWID", "Name", "Major", "Completed Courses", "Remaining Required", "Remaining Electives","GPA"]
-        for key, value in sorted(self.files_summary_student.items()):
-                res.add_row([key, value['Name'],value['Major'],sorted(value['Completed Courses']),sorted(list(set(self.majors[(value['Major']),'R'])
-                - set(value['Completed Courses']))),sorted([ x for x in (list(set(self.majors[(value['Major']),'E']) - set(value['Completed Courses'])))
-                if not set(self.majors[(value['Major']), 'E']).intersection(set(value['Completed Courses']))]),
-                                    round(value['GPA'][key]/len(value['Completed Courses']),2)])
-        print(f'Student summary')
-        print(res)
 
 
-
-
-
-
-class Instructor:
-    """
-    initialize directory and files_summary
-    """
-    def __init__(self, directory: List[tuple], grades: List[tuple]) -> None:
-        """
-        initialize directory and files_summary
-        """
-        self.directory: str = directory
-        self.files_summary_instructor: DefaultDict[str] = defaultdict(set)
-        self.files_counts_classes: List[str] = list()
-        self.grades = grades
-        self.sep = '\t'
-        self.fields = 3
-        self.header = False
-        self.instructor_data_file = 'instructors.txt'
-
-
-        self.instructor_file_reader(grades)
-
-
-    def instructor_file_reader(self, other: "Instructor") -> "Instructor":
+    def instructor(self, gd_list: List[str] , majors: List[str],instructors_data_file: List[str],header: bool,fields: int) -> "instructor":
         '''
         process instructor data and return results
         '''
@@ -281,9 +213,8 @@ class Instructor:
         instruct_feq: Dict[str, str] = dict()
         id: str
         line: str
-        header: bool = True
 
-        for id in other:
+        for id in gd_list:
             self.files_counts_classes.append((id[3],id[1]))
 
         for grade in self.files_counts_classes:
@@ -293,35 +224,74 @@ class Instructor:
                 instruct_feq[grade] = 1
 
 
-        fp: str = University.file_reader(self,self.instructor_data_file, self.directory)
-
-        for number, line in enumerate(fp,1):
-            instructor_fields: str = line.strip('\n').split(self.sep)
+        for number, line in enumerate(instructors_data_file,1):
             try:
-                if len(instructor_fields) == self.fields:
+                if len(line) == fields:
                     if number == 1 and header == True:
                         pass
                     else:
-                        if str(other).find(str(instructor_fields[0])) == -1:
-                            print(f"Warning unknown instructor {instructor_fields[0]} in {os.path.join(self.directory,self.instructor_data_file)} but not in grade file 'grades.txt'")
+                        if str(gd_list).find(str(line[0])) == -1:
+                            print(f"Warning unknown instructor {line[0]} in {os.path.join(self.directory,self.instructors_data_file)} but not in grade file 'grades.txt'")
                         else:
-                            for id in other:
-                                if id[3] == instructor_fields[0]:
-                                    self.files_summary_instructor[instructor_fields[0]].add(
-                                        (instructor_fields[1], instructor_fields[2], id[1], instruct_feq[(instructor_fields[0],id[1])] ))
+                            for id in gd_list:
+                                if id[3] == line[0]:
+                                    self.files_summary_instructor[line[0]].add(
+                                        (line[1], line[2], id[1], instruct_feq[(line[0],id[1])] ))
 
                 else:
-                    num_of_values: int = len(instructor_fields)
+                    num_of_values: int = len(line)
                     print(
-                        f"Warning : {os.path.join(self.directory, self.instructor_data_file)} has {num_of_values} fields on line {number} but expected {self.fields}")
+                        f"Warning : {os.path.join(self.directory, self.instructors_data_file)} has {num_of_values} fields on line {number} but expected {fields}")
 
             except IndexError as e:
-                return (f"Error {e} in {os.path.join(self.directory, self.instructor_data_file)} at line {number}")
+                return (f"Error {e} in {os.path.join(self.directory, self.instructors_data_file)} at line {number}")
 
         return self.files_summary_instructor
 
 
-    def pretty_print(self) -> None:
+
+
+
+class Student:
+    """
+    initialize Student attributes
+    """
+    def __init__(self, files_summary_student:Dict[str, str], files_summary_majors: Dict[str, str]) -> None:
+        """
+        process student data
+        """
+        self.files_summary_student = files_summary_student
+        self.files_summary_majors = files_summary_majors
+
+    def student_pretty_print(self) -> None:
+        """
+        display the summary using pretty table format
+        """
+        res = PrettyTable()
+        res.field_names = ["CWID", "Name", "Major", "Completed Courses", "Remaining Required", "Remaining Electives","GPA"]
+        for key, value in sorted(self.files_summary_student.items()):
+                res.add_row([key, value['Name'],value['Major'],sorted(value['Completed Courses']),sorted(list(set(self.files_summary_majors[(value['Major']),'R'])
+                - set(value['Completed Courses']))),sorted([ x for x in (list(set(self.files_summary_majors[(value['Major']),'E']) - set(value['Completed Courses'])))
+                if not set(self.files_summary_majors[(value['Major']), 'E']).intersection(set(value['Completed Courses']))]),
+                                    round(value['GPA'][key]/len(value['Completed Courses']),2)])
+        print(f'Student summary')
+        print(res)
+
+
+
+
+class Instructor:
+    """
+    initialize directory and files_summary
+    """
+    def __init__(self, files_summary_instructor: Dict[str, str], files_summary_majors: Dict[str, str]) -> None:
+        """
+        initialize Instructor attributes
+        """
+        self.files_summary_instructor = files_summary_instructor
+        self.files_summary_majors = files_summary_majors
+
+    def instructor_pretty_print(self) -> None:
         """
         display the instructor summary using pretty table format
         """
