@@ -28,20 +28,15 @@ class University:
         self.directory: str = directory
         self.files_summary_grades: List[str] = list()
         self.files_summary_majors: DefaultDict[str,str] = defaultdict()
-        self.student_grades: List[str] = list()
+        self.student_grades_db: List[str] = list()
         self.grades_data_file = 'grades.txt'
         self.majors_data_file = 'majors.txt'
 
         self.grades_data = self.process_grades()
-        print (self.grades_data)
         self.majors_data = self.process_majors()
-        print (self.majors_data)
 
         self.students_data: Student = Student(directory,self.files_summary_grades,self.files_summary_majors)
-        self.students_data.pretty_print()
         self.instructor_data: Instructor = Instructor(directory,self.files_summary_grades)
-        self.instructor_data.pretty_print()
-
 
     def file_reader(self,data_file, directory):
 
@@ -139,12 +134,15 @@ class University:
         '''
         connect to db and display data
         '''
-        db_file: str = db_path
-        res = PrettyTable()
-        db: sqlite3.Connection = sqlite3.connect(db_file)
-        for row in db.execute("select o.Name,o.CWID,i.Course, i.Grade, s.Name from students o join grades i on o.CWID == i.StudentCWID "
-                              "join instructors s on s.CWID = i.InstructorCWID order by o.Name"):
-            self.student_grades.append(row)
+        if os.path.exists(db_path):
+            db_file: str = db_path
+            res = PrettyTable()
+            db: sqlite3.Connection = sqlite3.connect(db_file)
+            query: str = f"select o.Name,o.CWID,i.Course, i.Grade, s.Name from students o join grades i on o.CWID == i.StudentCWID join instructors s on s.CWID = i.InstructorCWID order by o.Name"
+            for row in db.execute(query):
+                self.student_grades_db.append(row)
+        else:
+            raise FileNotFoundError(f"Can't open {db_path}")
 
 
 
@@ -154,7 +152,7 @@ class University:
         """
         res = PrettyTable()
         res.field_names = ["Name", "CWID", "Course","Grade", "Instructor"]
-        for row in self.student_grades:
+        for row in self.student_grades_db:
             res.add_row([row[0],row[1],row[2],row[3],row[4]])
         print(f'Student Grade Summary')
         print(res)
@@ -334,9 +332,3 @@ class Instructor:
                 res.add_row([key, k[0], k[1], k[2], k[3]])
         print(f'Instructor summary')
         print(res)
-
-
-university_data: University = University('/Users/jermainejackson/PycharmProjects/ssw810/University_Files')
-university_data.pretty_print_majors()
-university_data.student_grades_table_db("/Users/jermainejackson/binaries/hw11.sqlite")
-university_data.pretty_print_student_grades_table_db()
