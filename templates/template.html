@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+table, th, td {
+  border: 1px solid black;
+}
+</style>
+</head>
+<body>
+<h1>Stevens Repository</h1>
+<H3>Student, Cwid, Course, Grade, and Instructor</H3>
+<table>
+  <tr>
+    <th>Student</th><th>CWID</th><th>Course</th><th>Grade</th><th>Instructor</th>
+  </tr>
+  {% for n in repository %}
+  <tr><td>{{n[0]}}</td><td>{{n[1]}}</td><td>{{n[2]}}</td><td>{{n[3]}}</td><td>{{n[4]}}</td>
+  </tr>
+  {% endfor %}
+</table>
+</body>
+</html>
